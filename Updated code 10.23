@@ -1,0 +1,197 @@
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.Scanner;
+
+public class DrawingExample {
+
+    // Main method to launch the application
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Drawing Lines and Circles");
+        frame.setSize(400, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        DrawingPanel panel = new DrawingPanel();
+        frame.add(panel);
+        frame.setVisible(true);
+        //start
+        Point2D whiteball = new Point2D.Double();
+        whiteball.setLocation(100, 500);
+        Point2D colorball = new Point2D.Double();
+        colorball.setLocation(300, 100);
+        panel.drawCircleAt((int)whiteball.getX(), (int)whiteball.getY());
+        panel.drawCircleAt((int)colorball.getX(), (int)colorball.getY());
+        Line2D shotline = new Line2D.Double();
+        shotline.setLine(whiteball.getX(), whiteball.getY(), colorball.getX(), colorball.getY());
+        panel.drawlineat((int)shotline.getX1(), (int)shotline.getX1(), (int)shotline.getY1(), 0);
+        Scanner line = new Scanner(System.in);
+        while (true){
+            double bruh = line.nextDouble();
+            panel.turnCW(bruh);
+        }
+    }
+
+    // The JPanel where drawing will happen
+    static class DrawingPanel extends JPanel {
+        double wbdegrees = 90;
+        private int circleX = -1;
+        private int circleY = -1;
+        private int circleX2= -1;
+        private int circleY2 = -1;
+        private int circleX3= -1;
+        private int circleY3 = -1;
+        private int linex1 = -1;
+        private int linex2 = -1;
+        private int liney1 = -1;
+        private int liney2 = -1;
+        private int line2x1 = -1;
+        private int line2x2 = -1;
+        private int line2y1 = -1;
+        private int line2y2 = -1;
+        private int line3x1 = -1;
+        private int line3x2 = -1;
+        private int line3y1 = -1;
+        private int line3y2 = -1;
+
+        // Method to set the position of the custom circle
+        public void drawCircleAt(int x, int y) {
+            if (circleX == -1) {
+                this.circleX = x;
+                this.circleY = y;
+            }
+            else{
+                this.circleX2 = x;
+                this.circleY2 = y;
+            }
+            paintComponent(this.getGraphics());
+            repaint();  // Request a repaint to reflect the new circle position
+        }
+        public void colision(){
+            int a = Math.abs((int) (linex1 - linex2));
+            int b = Math.abs((int) (liney1 - liney2));
+            int c = (int)(Math.sqrt((a * a) + (b * b)));
+            for (int i = 0; i <= c; i++){
+                int xpos = (int)(linex1 - (i * Math.cos(Math.toRadians(wbdegrees))));
+                int ypos = (int)(liney1 - (i * Math.sin(Math.toRadians(wbdegrees))));
+                Point2D bruh = new Point2D.Double();
+                bruh.setLocation(xpos, ypos);
+                if (bruh.distance(circleX2, circleY2) < 50){
+                    //System.out.println(xpos + " " + ypos);
+                    line2x1 = circleX2;
+                    line2y1 = circleY2;
+                    line2x2 = circleX2;
+                    line2y2 = circleY2;
+                    circleX3 = xpos;
+                    circleY3 = ypos;
+                    linex2 = xpos;
+                    liney2 = ypos;
+                    Point2D circle3 = new Point2D.Double();
+                    circle3.setLocation(xpos, ypos);
+                    double dist = circle3.distance(circleX2, circleY2);
+                    int distx = (circleX2 - circleX3);
+                    //System.out.println(dist + " this is dist");
+                    int angle = (int)(Math.toDegrees(Math.acos(distx / dist)));
+                    int tempangle;
+                    if (circleY2 > circleY3) {
+                        tempangle = 180 + angle;
+                    }
+                    else{
+                        tempangle = 180 - angle;
+                    }
+                    System.out.println(wbdegrees + " wb " + tempangle);
+                    double angle1 = Math.abs(wbdegrees % 180);
+                    double angle2 = Math.abs(tempangle % 180);
+                    double offby = Math.abs(angle1 - angle2);
+                    double multiplier = (90 - offby) / 90;
+                    //System.out.println(angle + " angle");
+                    //System.out.println(wbdegrees + " degrees");
+                    System.out.println("multi" + multiplier);
+                    int whitelinelength = (int)(60 * (1 - multiplier));
+                    int linelength = (int)(60 * multiplier);
+                    int addedx = (int) (linelength * Math.cos(Math.toRadians(angle)));
+                    int addedy = (int) (linelength * Math.sin(Math.toRadians(angle)));
+                    int reboundx;
+                    int reboundy;
+                    if (circleY2 > circleY3) {
+                        reboundx = (int)(circleX2 + addedx);
+                        reboundy = (int)(circleY2 + addedy);
+                    }
+                    else {
+                        reboundx = (int)(circleX2 + addedx);
+                        reboundy = (int)(circleY2 - addedy);
+                    }
+                    System.out.println(addedx + " " + addedy);
+                    line2x2 = reboundx;
+                    line2y2 = reboundy;
+                    int wbrebound;
+                    if (circleX2 > circleX3){
+                        wbrebound = angle - 90;
+                    }
+                    else{
+                        wbrebound = angle + 90;
+                    }
+                    line3x1 = circleX3;
+                    line3y1 = circleY3;
+                    line3x2 = (int)((circleX3) - (whitelinelength * Math.cos(Math.toRadians(wbrebound))));
+                    if (circleY2 >= circleY3) {
+                        line3y2 = (int) ((circleY3) - (whitelinelength * Math.sin(Math.toRadians(wbrebound))));
+                    }
+                    else{
+                        line3y2 = (int) ((circleY3) + (whitelinelength * Math.sin(Math.toRadians(wbrebound))));
+                    }
+                    break;
+                }
+            }
+        }
+        public void drawlineat(int x1, int x2, int y1, int y2){
+            this.linex1 = x1;
+            this.linex2 = x2;
+            this.liney1 = y1;
+            this.liney2 = y2;
+            //reset everythng before collison check;
+            circleX3 = -1;
+            circleY3 = -1;
+            line2x1 = -1;
+            line2y1 = -1;
+            line3x1 = -1;
+            colision();
+            repaint();
+        }
+        public void turnCW(double degrees){
+            wbdegrees += degrees;
+            double radian = Math.toRadians(wbdegrees);
+            int adj = (int) (600 * Math.cos(radian));
+            int opp = (int) (600 * Math.sin(radian));
+            int newx2 = linex1 - adj;
+            int newy2 = liney1 - opp;
+            drawlineat(linex1, newx2, liney1, newy2);
+
+        }
+
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (circleX3 != -1){
+                g.drawOval(circleX3 - 25, circleY3 -25, 50, 50);
+            }
+            if (line2x1 != -1){
+                g.drawLine(line2x1, line2y1, line2x2, line2y2);
+            }
+            if (line3x1 != -1){
+                g.drawLine(line3x1, line3y1, line3x2, line3y2);
+            }
+            if (linex1 != -1){
+                g.drawLine(linex1, liney1, linex2, liney2);
+            }
+
+            // Drawing the custom circle, if coordinates are set
+            if (circleX != -1 && circleY != -1) {
+                g.drawOval(circleX - 25, circleY - 25, 50, 50);  // Subtracting 25 to make the circle centered on the provided coordinates
+            }
+            if (circleX2 != -1 && circleY2 != -1) {
+                g.drawOval(circleX2 - 25, circleY2 - 25, 50, 50);  // Subtracting 25 to make the circle centered on the provided coordinates
+            }
+        }
+    }
+}
