@@ -1,0 +1,43 @@
+import java.util.Scanner;
+Ball[] balls =  { 
+  new Ball(100, 400, 20), 
+  new Ball(500, 200, 20) 
+};
+wing hmm = new wing();
+void setup() {
+  size(400, 600);
+}
+
+void draw() {
+  background(51);
+  boolean drawline = true;
+  for (Ball b : balls) {
+    if (b.click == false){
+      drawline = false;
+    }
+    b.update();
+    b.display();
+    b.checkBoundaryCollision();
+  }
+  if (drawline){
+    stroke(126);
+  strokeWeight(5);
+  line(balls[0].position.x, balls[0].position.y, mouseX, mouseY);
+  }
+  balls[0].checkCollision(balls[1]);
+}
+void mousePressed(){
+  boolean check = true;
+  for (Ball b : balls) {
+    if (b.click){
+  }
+  else{
+    check = false;
+  }
+  }
+  if (check == true){
+    float x = balls[0].position.x;
+    float y = balls[0].position.y;
+  balls[0].velocity = new PVector((mouseX - x) * .05, (mouseY - y) * .05);
+  }
+}
