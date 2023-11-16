@@ -1,0 +1,267 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Scanner;
+
+public class AdvancedDraw extends JPanel{
+    double shotAngle = 90;
+    Line2D shotLine = new Line2D.Double(0, 0, 0 ,0);
+    PoolBall Collide = null;
+    Line2D[] reboundLines = null;
+    public Line2D[] barrier = new Line2D[4];
+    double[] reboundAngle = new double[2];
+    boolean drawShotLine = true;
+
+    public List<PoolBall> onTable = new ArrayList<>();
+
+    public void updateShot(){
+        double radian = Math.toRadians(shotAngle);
+        double adj = (600 * Math.cos(radian));
+        double opp = (600 * Math.sin(radian));
+        int whitex = onTable.get(0).getx();
+        int whitey = onTable.get(0).gety();
+        shotLine = new Line2D.Double(whitex, whitey, whitex - adj, whitey- opp);
+        Collide = null;
+        reboundAngle = null;
+        reboundLines = null;
+        checkcollision();
+    }
+    public void checkcollision(){
+        //make a triangle of the shotline to find the hypot
+        int aSide = Math.abs((int) (shotLine.getX1() - shotLine.getX2()));
+        int bSide = Math.abs((int) (shotLine.getY1() - shotLine.getY2()));
+        int cSide = (int)(Math.sqrt((aSide * aSide) + (bSide * bSide)));
+        //iterate through the hypotenuse line
+        int coll = 0;
+        for (int i = 0; i <= cSide; i++) {
+            int xpos = (int)(shotLine.getX1() - (i * Math.cos(Math.toRadians(shotAngle))));
+            int ypos = (int)(shotLine.getY1() - (i * Math.sin(Math.toRadians(shotAngle))));
+            Point2D positionOnHypot = new Point2D.Double(xpos, ypos);
+            //find where or if they collide
+            for (int j = 1; j < onTable.size(); j++){
+            if (positionOnHypot.distance(onTable.get(j).getx(), onTable.get(j).gety()) < 50) {
+                collision(xpos, ypos, j);
+                coll = 1;
+                break;
+            }
+            }
+            for (int g = 0; g < barrier.length; g++){
+                if (barrier[g].ptLineDist(xpos, ypos) < 26){
+                    wallCollision(g, xpos, ypos);
+                    coll = 1;
+                    break;
+                }
+            }
+            if (coll == 1){
+                break;
+            }
+        }
+    }
+    public void wallCollision(int wall, int x, int y){
+        System.out.println(wall);
+        shotLine.setLine(shotLine.getX1(), shotLine.getY1(), x, y);
+        Collide = new PoolBall(x, y);
+        //rebound line
+        if (wall == 0 || wall == 1){
+            double wallangle = Math.toRadians(180 - shotAngle);
+            double adj = (60 * Math.cos(wallangle));
+            double opp = (60 * Math.sin(wallangle));
+            Line2D wallbounce = new Line2D.Double(x, y, x - adj, y - opp);
+            reboundLines = new Line2D[2];
+            reboundLines[0] = wallbounce;
+            reboundLines[1] = wallbounce;
+        }
+
+        else{
+            double wallangle = Math.toRadians(180 - shotAngle);
+            double adj = (60 * Math.cos(wallangle));
+            double opp = (60 * Math.sin(wallangle));
+            Line2D wallbounce = new Line2D.Double(x, y, x + adj, y + opp);
+            reboundLines = new Line2D[2];
+            reboundLines[0] = wallbounce;
+            reboundLines[1] = wallbounce;
+        }
+    }
+    public void collision(int x, int y, int index) {
+        PoolBall hit = onTable.get(index);
+        Collide = new PoolBall(x, y);
+        shotLine.setLine(shotLine.getX1(), shotLine.getY1(), x, y);
+        double deltax = x - hit.getx();
+        double deltay = y - hit.gety();
+        double deltac = Math.sqrt((deltax * deltax) + deltay * deltay);
+        double theta = Math.acos(deltax / deltac);
+        theta = Math.toDegrees(theta);
+        if (y < onTable.get(index).gety()) {
+            theta = 360 - theta;
+        }
+        System.out.println(theta + " theta");
+        System.out.println(shotAngle);
+        //
+
+        double linelength = 60;
+        double whiteLine = linelength;
+        double reboundLine = linelength;
+        //to find multiplier for line length, get line from wb to target
+        // and scale based on the distance to that point
+        Point2D WB = new Point2D.Double(onTable.get(0).getx(), onTable.get(0).gety());
+        Point2D Target = new Point2D.Double(hit.getx(), hit.gety());
+        double adj = Target.getX() - WB.getX();
+        double opp = Target.getY() - WB.getY();
+        double dist = WB.distance(Target);
+        double scale = (dist - 50) / dist;
+        Point2D best = new Point2D.Double(WB.getX() + (adj * scale), WB.getY() + (opp * scale));
+        //shotLine.setLine(shotLine.getX1(), shotLine.getY1(), best.getX(), best.getY());
+        //System.out.println(best.distance(x, y) + "kcdfdf");
+        double linescale = (50 - best.distance(x, y)) / 50;
+        whiteLine = (1 - linescale) * whiteLine;
+        reboundLine = reboundLine * linescale;
+
+
+        //rebound line
+        int rHitx = (int) (hit.getx() - (reboundLine * (Math.cos(Math.toRadians(theta)))));
+        int rHity = (int) (hit.gety() - (reboundLine * (Math.sin(Math.toRadians(theta)))));
+        Line2D hitrebound = new Line2D.Double(hit.getx(), hit.gety(), rHitx, rHity);
+        reboundLines = new Line2D[2];
+        reboundLines[0] = hitrebound;
+        //whiteballs rebound
+        double whiteTheta;
+        double add90white = theta + 90;
+        double sub90white = theta - 90;
+        if (add90white > 360){
+            add90white %= 360;
+        }
+        if (sub90white < 0){
+            sub90white = 360 + sub90white;
+        }
+        whiteTheta = 0;
+        int add = (int)add90white;
+        int sub = (int)sub90white;
+        int minusangle = (int)shotAngle;
+        int plusangle = (int)shotAngle;
+        while (true){
+            if (plusangle >= 360){
+                plusangle %= 360;
+            }
+            if (minusangle < 0){
+                minusangle = 360 + minusangle;
+            }
+            if (minusangle == add || plusangle == add){
+                whiteTheta = add90white;
+                break;
+            }
+            if (minusangle == sub || plusangle == sub){
+                whiteTheta = sub90white;
+                break;
+            }
+            plusangle++;
+            minusangle--;
+        }
+        System.out.println(add90white + " added : subtracted " + sub90white);
+        System.out.println(shotAngle + " shot");
+        int wHitx = (int)(x - (whiteLine * (Math.cos(Math.toRadians(whiteTheta)))));
+        int wHity = (int)(y - (whiteLine * (Math.sin(Math.toRadians(whiteTheta)))));
+        Line2D whiteHitRebound = new Line2D.Double(x, y, wHitx, wHity);
+        reboundLines[1] = whiteHitRebound;
+        System.out.println(whiteTheta);
+    }
+    public void shoot() {
+        System.out.println(shotAngle + "shot ");
+        drawShotLine = false;
+        double radian = Math.toRadians(shotAngle);
+        Collide = null;
+        int shotlength = 50;
+        PoolBall whB = onTable.get(0);
+        int startx = whB.getx();
+        int starty = whB.gety();
+        for (int i = 0; i <= shotlength; i++){
+
+            double adj = (i * Math.cos(radian));
+            double opp = (i * Math.sin(radian));
+            whB.xpos = (int)(startx - adj);
+            whB.ypos = (int)(starty - opp);
+            try {
+                Thread.sleep(15);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            shotLine.setLine(whB.getx(), whB.gety(), shotLine.getX2(), shotLine.getY2());
+            reboundLines = null;
+            repaint();
+        }
+        drawShotLine = true;
+        turn(0);
+    }
+    public void turn(double x){
+        shotAngle += x;
+        shotAngle = shotAngle % 360;
+        if (shotAngle < 0){
+            shotAngle = 360 + shotAngle;
+        }
+        reboundLines = new Line2D[2];
+        updateShot();
+        repaint();
+    }
+    protected void paintComponent(Graphics g){
+        for (int i = 0; i < onTable.size(); i++){
+            PoolBall currentball = onTable.get(i);
+            g.drawOval(currentball.getx() - 25, currentball.gety() - 25, 50, 50);
+        }
+        if (drawShotLine) {
+            g.drawLine((int) shotLine.getX1(), (int) shotLine.getY1(), (int) shotLine.getX2(), (int) shotLine.getY2());
+        }
+        if (Collide != null){
+            g.drawOval(Collide.getx() - 25, Collide.gety() - 25, 50, 50);
+        }
+        if (reboundLines != null){
+            g.drawLine((int)reboundLines[0].getX1(), (int)reboundLines[0].getY1(), (int)reboundLines[0].getX2(), (int)reboundLines[0].getY2());
+            g.drawLine((int)reboundLines[1].getX1(), (int)reboundLines[1].getY1(), (int)reboundLines[1].getX2(), (int)reboundLines[1].getY2());
+        }
+        for (int h = 0; h < barrier.length; h++){
+            g.drawLine((int)barrier[h].getX1(), (int)barrier[h].getY1(), (int)barrier[h].getX2(), (int)barrier[h].getY2());
+        }
+    }
+    public static void main(String[] args){
+        JFrame frame = new JFrame("Pool");
+        frame.setSize(400, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        AdvancedDraw table = new AdvancedDraw();
+        //walls
+        Line2D left = new Line2D.Double(10, 10, 10, 570);
+        Line2D right = new Line2D.Double(390, 10, 390, 570);
+        Line2D top = new Line2D.Double(10, 10, 390, 10);
+        Line2D bottom = new Line2D.Double(10, 570, 390, 570);
+        table.barrier[0] = left;
+        table.barrier[1] = right;
+        table.barrier[2] = top;
+        table.barrier[3] = bottom;
+        //
+        frame.add(table);
+        frame.setVisible(true);
+        PoolBall whiteball = new PoolBall(300, 500);
+        PoolBall shotball = new PoolBall(200, 300);
+        PoolBall shotball2 = new PoolBall(100, 500);
+        PoolBall shotball3 = new PoolBall(100, 100);
+        PoolBall shotball4 = new PoolBall(300, 100);
+        table.onTable.add(whiteball);
+        table.onTable.add(shotball);
+        table.onTable.add(shotball2);
+        table.onTable.add(shotball3);
+        table.onTable.add(shotball4);
+        Scanner input = new Scanner(System.in);
+        while (true){
+            String read = input.nextLine();
+            if (read.equals("shoot")){
+                table.shoot();
+            }
+            else{
+                double number = Double.parseDouble(read);
+                table.turn(number);
+            }
+        }
+    }
+}
