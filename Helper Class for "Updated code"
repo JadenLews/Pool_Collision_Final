@@ -1,0 +1,19 @@
+public class PoolBall {
+    int xpos;
+    int ypos;
+    double velocity = 0;
+    double direction;
+    public  PoolBall(int x, int y){
+        xpos = x;
+        ypos = y;
+    }
+    public int getx(){
+        return this.xpos;
+    }
+    public int gety(){
+        return this.ypos;
+    }
+    public static void main(String[] args){
+
+    }
+}
