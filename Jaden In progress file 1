@@ -1,0 +1,83 @@
+import java.util.Scanner;
+Ball[] balls =  { 
+  new Ball(100, 400, 20), 
+  new Ball(500, 200, 20),
+  new Ball(300, 100, 20)
+};
+PVector mousepos = new PVector(0, 0);
+int sincelast = 5;
+boolean drawline = true;
+wing hmm = new wing();
+void setup() {
+  size(400, 600);
+}
+
+void draw() {
+  PVector currentmouse = new PVector(mouseX, mouseY);
+  if (currentmouse.x == mousepos.x && currentmouse.y == mousepos.y && balls[0].click){
+    sincelast--;
+  }
+  else{
+    sincelast = 5;
+  }
+  if (currentmouse.x == mousepos.x && currentmouse.y == mousepos.y && balls[0].click && sincelast > 0){
+    //do nothing
+  }
+  else{
+  background(51);
+  drawline = true;
+  for (Ball b : balls) {
+    if (b.click == false){
+      drawline = false;
+    }
+    b.update();
+    b.display();
+    b.checkBoundaryCollision();
+    //collision with multiple balls
+    for (Ball bb : balls) {
+      if (b == bb){
+        continue;
+    }
+    b.checkCollision(bb);
+  }
+}
+if (drawline){
+    stroke(126);
+  strokeWeight(5);
+  float x1 = balls[0].position.x;
+  float y1 = balls[0].position.y;
+  float x2 = mouseX;
+  float y2 = mouseY;
+  hmm.checkcollision(x1, y1, x2, y2, balls);
+  }
+  }
+  if (drawline){
+  double maxdist = Math.sqrt(400 * 400 + 600 * 600);
+  PVector mousepos = new PVector(mouseX, mouseY);
+  PVector distanceVect = PVector.sub(balls[0].position , mousepos);
+  double dist = distanceVect.mag();
+  double fraction = dist / maxdist;
+  stroke(0 + (float)(255 * fraction), 255 - (float)(255 * fraction), 0);
+  strokeWeight(15);
+  line(5, 600, 5, 600 - (float)(600 * fraction));
+  }
+  mousepos = currentmouse;
+}
+
+
+
+void mousePressed(){
+  boolean check = true;
+  for (Ball b : balls) {
+    if (b.click){
+  }
+  else{
+    check = false;
+  }
+  }
+  if (check == true){
+    float x = balls[0].position.x;
+    float y = balls[0].position.y;
+  balls[0].velocity = new PVector((mouseX - x) * .025, (mouseY - y) * .025);
+  }
+}
