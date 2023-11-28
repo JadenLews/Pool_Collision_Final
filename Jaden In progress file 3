@@ -1,11 +1,22 @@
 class Ball {
+   PVector HTL = new PVector(100, 100);
+  PVector HTM = new PVector(500, 75);
+  PVector HTR = new PVector(900, 100);
+  PVector HBL = new PVector(100, 500);
+  PVector HBR = new PVector(900, 500);
+  PVector HBM = new PVector(500, 525);
   PVector position;
   public PVector velocity;
+  boolean ontable = true;
+  int grace = 0;
+  int red;
+  int green;
+  int blue;
 
   public float radius, m;
   public boolean click = true;
 
-  Ball(float x, float y, float r_) {
+  Ball(float x, float y, float r_, int red, int green, int blue) {
     position = new PVector(x, y);
     PVector velo = new PVector(0, 0);
     //velocity = PVector.random2D();
@@ -13,6 +24,9 @@ class Ball {
     velocity.mult(3);
     radius = r_;
     m = radius*.1;
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
   }
 
   void update() {
@@ -26,19 +40,35 @@ class Ball {
     }
   }
 
-  void checkBoundaryCollision() {
-    if (position.x > width-radius) {
-      position.x = width-radius;
-      velocity.x *= -1;
-    } else if (position.x < radius) {
-      position.x = radius;
-      velocity.x *= -1;
-    } else if (position.y > height-radius) {
-      position.y = height-radius;
-      velocity.y *= -1;
-    } else if (position.y < radius) {
-      position.y = radius;
-      velocity.y *= -1;
+  boolean checkBoundaryCollision(Ball[] balls, Ball ball) {
+    PVector distV1 = PVector.sub(ball.position , HTL);
+    float dist1 = distV1.mag();
+    
+    PVector distV2 = PVector.sub(ball.position , HTM);
+    float dist2 = distV2.mag();
+    
+    PVector distV3 = PVector.sub(ball.position , HTR);
+    float dist3 = distV3.mag();
+    
+    PVector distV4 = PVector.sub(ball.position , HBL);
+    float dist4 = distV4.mag();
+    
+    PVector distV5 = PVector.sub(ball.position , HBR);
+    float dist5 = distV5.mag();
+    
+    PVector distV6 = PVector.sub(ball.position , HBM);
+    float dist6 = distV6.mag();
+    float radius = ball.radius;
+    if (dist1 < radius || dist2 < radius || dist3 < radius || dist4 < radius || dist5 < radius || dist6 < radius){
+      if (ball == balls[0]){
+        ball.position = new PVector(200, 200);
+        ball.velocity = new PVector(0, 0);
+        return false;
+      }
+      else{
+      ball.ontable = false;
+      return true;
+      }
     }
     if (velocity.x < .01 && velocity.y < .01 && velocity.x > -.01 && velocity.x > -.01){
       click = true;
@@ -46,6 +76,7 @@ class Ball {
     else{
       click = false;
     }
+    return false;
   }
 
   void checkCollision(Ball other) {
@@ -159,7 +190,7 @@ class Ball {
 
   void display() {
     noStroke();
-    fill(204);
+    fill(red, green, blue);
     ellipse(position.x, position.y, radius*2, radius*2);
   }
 }
