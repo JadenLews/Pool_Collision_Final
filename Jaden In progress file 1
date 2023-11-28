@@ -1,15 +1,154 @@
 import java.util.Scanner;
 Ball[] balls =  { 
-  new Ball(100, 400, 20), 
-  new Ball(500, 200, 20),
-  new Ball(300, 100, 20)
+  new Ball(125, 400, 20, 255, 255, 255), 
+  new Ball(500, 200, 20, 255, 0, 0),
+  new Ball(500, 425, 20, 0, 255, 0),
+  new Ball(150, 325, 20, 0, 0, 255),
+  new Ball(250, 225, 20, 100, 100, 0),
+  new Ball(300, 125, 20, 0, 0, 0)
 };
+ // line(140, 500, 130, 510);
+ // line(100, 460, 90, 470);
+  
+ // line(460, 500, 470, 510);
+ // line(540, 500, 530, 510);
+
+
+
+wall tables[] = new wall[18];
+//walls
+PVector one = new PVector(100, 150);
+PVector two = new PVector(100, 450);
+wall left = new wall();
+
+PVector three = new PVector(150, 100);
+PVector four = new PVector(450, 100);
+wall topleft = new wall();
+
+PVector five = new PVector(550, 100);
+PVector six = new PVector(850, 100);
+wall topright = new wall();
+
+PVector seven = new PVector(900, 150);
+PVector eight = new PVector(900, 450);
+wall right = new wall();
+
+PVector nine = new PVector(150, 500);
+PVector ten = new PVector(450, 500);
+wall bottomleft = new wall();
+
+PVector eleven = new PVector(550, 500);
+PVector twelve = new PVector(850, 500);
+wall bottomright = new wall();
+//angled
+PVector thirteen = new PVector(100, 140);
+PVector fourteen = new PVector(90, 130);
+wall TL1 = new wall();
+
+PVector fifteen = new PVector(140, 100);
+PVector sixteen = new PVector(130, 90);
+wall TL2 = new wall();
+
+PVector seventeen = new PVector(460, 100);
+PVector eighteen = new PVector(470, 90);
+wall TM1 = new wall();
+
+PVector nineteen = new PVector(540, 100);
+PVector twenty = new PVector(530, 90);
+wall TM2 = new wall();
+
+PVector twentyone = new PVector(860, 100);
+PVector twentytwo = new PVector(870, 90);
+wall TR1 = new wall();
+
+PVector twentythree = new PVector(900, 140);
+PVector twentyfour = new PVector(910, 130);
+wall TR2 = new wall();
+
+PVector twentyfive = new PVector(900, 460);
+PVector twentysix = new PVector(910, 470);
+wall BR1 = new wall();
+
+PVector twentyseven = new PVector(860, 500);
+PVector twentyeight = new PVector(870, 510);
+wall BR2 = new wall();
+
+PVector twentynine = new PVector(140, 500);
+PVector thirty = new PVector(130, 510);
+wall BM1 = new wall();
+
+PVector thirtyone = new PVector(100, 460);
+PVector thirtytwo = new PVector(90, 470);
+wall BM2 = new wall();
+
+PVector thirtythree = new PVector(460, 500);
+PVector thirtyfour = new PVector(470, 510);
+wall BL1 = new wall();
+
+PVector thirtyfive = new PVector(540, 500);
+PVector thirtysix = new PVector(530, 510);
+wall BL2 = new wall();
+
 PVector mousepos = new PVector(0, 0);
 int sincelast = 5;
 boolean drawline = true;
 wing hmm = new wing();
 void setup() {
-  size(400, 600);
+  size(1000, 600);
+  left.setting(one, two);
+tables[0] = left;
+
+topleft.setting(three, four);
+tables[1] = topleft;
+
+topright.setting(five, six);
+tables[2] = topright;
+
+right.setting(seven, eight);
+tables[3] = right;
+
+bottomleft.setting(nine, ten);
+tables[4] = bottomleft;
+
+bottomright.setting(eleven, twelve);
+tables[5] = bottomright;
+
+TL1.setting(thirteen, fourteen);
+tables[6] = TL1;
+
+TL2.setting(fifteen, sixteen);
+tables[7] = TL2;
+
+TM1.setting(seventeen, eighteen);
+tables[8] = TM1;
+
+TM2.setting(nineteen, twenty);
+tables[9] = TM2;
+
+TR1.setting(twentyone, twentytwo);
+tables[10] = TR1;
+
+TR2.setting(twentythree, twentyfour);
+tables[11] = TR2;
+
+BR1.setting(twentyfive, twentysix);
+tables[12] = BR1;
+
+BR2.setting(twentyseven, twentyeight);
+tables[13] = BR2;
+
+BM1.setting(twentynine, thirty);
+tables[14] = BM1;
+
+BM2.setting(thirtyone, thirtytwo);
+tables[15] = BM2;
+
+BL1.setting(thirtythree, thirtyfour);
+tables[16] = BL1;
+
+BL2.setting(thirtyfive, thirtysix);
+tables[17] = BL2;
+
 }
 
 void draw() {
@@ -24,15 +163,35 @@ void draw() {
     //do nothing
   }
   else{
-  background(51);
+  background(21, 88, 67);
+  //circles
+  noStroke();
+  fill(0);
+  ellipse(100, 100, 60, 60);
+  ellipse(500, 75, 60, 60);
+  ellipse(900, 100, 60, 60);
+  ellipse(100, 500, 60, 60);
+  ellipse(900, 500, 60, 60);
+  ellipse(500, 525, 60, 60);
+  //
   drawline = true;
   for (Ball b : balls) {
+    if (b.ontable){
     if (b.click == false){
       drawline = false;
     }
+    for (int i = 0; i < tables.length; i++){
+      tables[i].collide(b);
+      tables[i].check(b);
+    }
+    b.grace = b.grace - 1;
     b.update();
     b.display();
-    b.checkBoundaryCollision();
+    if (b.checkBoundaryCollision(balls, b)){
+      b.position = new PVector(0,0);
+      b.velocity = new PVector(0,0);
+      b.click = true;
+    }
     //collision with multiple balls
     for (Ball bb : balls) {
       if (b == bb){
@@ -51,8 +210,9 @@ if (drawline){
   hmm.checkcollision(x1, y1, x2, y2, balls);
   }
   }
+  }
   if (drawline){
-  double maxdist = Math.sqrt(400 * 400 + 600 * 600);
+  double maxdist = Math.sqrt(500 * 500 + 700 * 700);
   PVector mousepos = new PVector(mouseX, mouseY);
   PVector distanceVect = PVector.sub(balls[0].position , mousepos);
   double dist = distanceVect.mag();
@@ -61,6 +221,36 @@ if (drawline){
   strokeWeight(15);
   line(5, 600, 5, 600 - (float)(600 * fraction));
   }
+  stroke(255);
+  strokeWeight(3);
+  //table barrier
+  line(100, 140, 100, 460);
+  
+  line(140, 100, 460, 100);
+  line(540, 100, 860, 100);
+  
+  line(900, 140, 900, 460);
+  
+  line(140, 500, 460, 500);
+  line(540, 500, 860, 500);
+  //angled
+  line(100, 140, 90, 130);
+  line(140, 100, 130, 90);
+  
+  line(460, 100, 470, 90);
+  line(540, 100, 530, 90);
+  
+  line(860, 100, 870, 90);
+  line(900, 140, 910, 130);
+  
+  line(900, 460, 910, 470);
+  line(860, 500, 870, 510);
+  
+  line(140, 500, 130, 510);
+  line(100, 460, 90, 470);
+  
+  line(460, 500, 470, 510);
+  line(540, 500, 530, 510);
   mousepos = currentmouse;
 }
 
@@ -78,6 +268,6 @@ void mousePressed(){
   if (check == true){
     float x = balls[0].position.x;
     float y = balls[0].position.y;
-  balls[0].velocity = new PVector((mouseX - x) * .025, (mouseY - y) * .025);
+  balls[0].velocity = new PVector((mouseX - x) * .04, (mouseY - y) * .04);
   }
 }
