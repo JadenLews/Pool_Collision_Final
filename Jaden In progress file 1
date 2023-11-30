@@ -1,20 +1,40 @@
 import java.util.Scanner;
 Ball[] balls =  { 
   new Ball(125, 400, 20, 255, 255, 255), 
-  new Ball(500, 200, 20, 255, 0, 0),
-  new Ball(500, 425, 20, 0, 255, 0),
-  new Ball(150, 325, 20, 0, 0, 255),
-  new Ball(250, 225, 20, 100, 100, 0),
-  new Ball(300, 125, 20, 0, 0, 0)
-};
- // line(140, 500, 130, 510);
- // line(100, 460, 90, 470);
+  new Ball(600, 300, 20, 255, 0, 0),
   
- // line(460, 500, 470, 510);
- // line(540, 500, 530, 510);
+  new Ball(640, 278, 20, 0, 255, 0),
+  new Ball(640, 322, 20, 0, 0, 255),
+  
+  new Ball(680, 258, 20, 100, 100, 0),
+  new Ball(680, 300, 20, 0, 0, 0),
+  new Ball(680, 342, 20, 100, 100, 0),
+  
+  new Ball(720, 236, 20, 100, 100, 0),
+  new Ball(720, 278, 20, 100, 100, 0),
+  new Ball(720, 322, 20, 100, 100, 0),
+  new Ball(720, 364, 20, 100, 100, 0),
+  
+  //new Ball(880, 450, 20, 100, 100, 0),
+  //new Ball(840, 450, 20, 100, 100, 0),
+  
+  new Ball(760, 216, 20, 100, 100, 0),
+  new Ball(760, 258, 20, 100, 100, 0),
+  new Ball(760, 300, 20, 100, 100, 0),
+  new Ball(760, 342, 20, 100, 100, 0),
+  new Ball(760, 384, 20, 100, 100, 0),
 
 
 
+
+  
+  //new Ball(125, 300, 20, 255, 255, 255), 
+  //new Ball(799, 300, 20, 255, 0, 0),
+  //new Ball(840, 300, 20, 0, 255, 0),
+  //new Ball(880, 300, 20, 0, 0, 255),
+  //new Ball(758, 300, 20, 100, 100, 0),
+  //new Ball(800, 340, 20, 0, 0, 0)
+};
 wall tables[] = new wall[18];
 //walls
 PVector one = new PVector(100, 150);
@@ -180,6 +200,14 @@ void draw() {
     if (b.click == false){
       drawline = false;
     }
+    //dont let go out of bounds
+    if (b.position.x > 910 - b.radius){
+      b.position.x = 900 - (b.radius + 2);
+    }
+    if (b.position.x < 90 + b.radius){
+      b.position.x = 90 + (b.radius + 2);
+    }
+    //
     for (int i = 0; i < tables.length; i++){
       tables[i].collide(b);
       tables[i].check(b);
@@ -259,7 +287,7 @@ if (drawline){
 void mousePressed(){
   boolean check = true;
   for (Ball b : balls) {
-    if (b.click){
+    if (b.click){  
   }
   else{
     check = false;
