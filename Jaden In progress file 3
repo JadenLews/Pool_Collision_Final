@@ -58,7 +58,7 @@ class Ball {
     
     PVector distV6 = PVector.sub(ball.position , HBM);
     float dist6 = distV6.mag();
-    float radius = ball.radius;
+    float radius = ball.radius * 1.5;
     if (dist1 < radius || dist2 < radius || dist3 < radius || dist4 < radius || dist5 < radius || dist6 < radius){
       if (ball == balls[0]){
         ball.position = new PVector(200, 200);
@@ -144,8 +144,8 @@ class Ball {
       vFinal[1].y = vTemp[1].y;
 
       // hack to avoid clumping
-      bTemp[0].x += vFinal[0].x;
-      bTemp[1].x += vFinal[1].x;
+      //bTemp[0].x += vFinal[0].x;
+      //bTemp[1].x += vFinal[1].x;
 
       /* Rotate ball positions and velocities back
        Reverse signs in trig expressions to rotate 
@@ -185,6 +185,15 @@ class Ball {
     else{
       other.click = false;
     }
+    //fix clumping
+    float deltax = other.position.x - this.position.x;
+    float deltay = other.position.y - this.position.y;
+    double deltac = Math.sqrt((deltax * deltax) + (deltay * deltay));
+    PVector distt = new PVector(deltax, deltay);
+    float womp = (float)deltac;
+    float amount = Math.abs(minDistance / womp);
+    //amount = amount / 1.8;
+    other.position = new PVector(this.position.x + (amount * deltax), this.position.y + (amount * deltay));
     }
   }
 
